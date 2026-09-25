@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>用户主页 - 在线代码评测与竞赛系统</title>
+  <link rel="stylesheet" href="/assets/app.css">
+</head>
+<body>
+  <div id="nav"></div>
+
+  <div class="container" style="max-width:960px">
+    <div id="profileBody"><div class="empty"><span class="spinner"></span> 加载中…</div></div>
+  </div>
+
+  <script src="/assets/app.js"></script>
+  <script>
+    OJ.boot();
+    const userKey = new URLSearchParams(location.search).get("u") || "";
+    const ROLE = { admin: "管理员", judge: "裁判", user: "普通用户" };
+    const CSTATUS = {
+      upcoming: ["未开始", "cyan"], running: ["进行中", "AC"], ended: ["已结束", "gray"],
+    };
+
+    function problemCell(p) {
+      const id = OJ.esc(p.problem_id);
+      const title = p.title
+        ? `<a href="/problem.html?id=${id}">${OJ.esc(p.title)}</a>`
+        : `<span class="muted" title="题目可能已被删除">${id}（已删除）</span>`;
+      return `<span class="mono muted">${id}</span> ${title}`;
+    }
+
+    function renderSolved(d) {
+      if (!d.solved_count) {
+        return `<div class="card">
+          <div class="card-title">✅ 已通过题目 <span class="hint">0 道</span></div>
+          <div class="empty">还没有通过的题目，去题单试试第一道题吧</div>
+        </div>`;
+      }
+      const rows = d.solved_problems.map(p => `
+        <tr>
+          <td class="mono muted">${OJ.esc(p.problem_id)}</td>
+          <td>${p.title
+            ? `<a href="/problem.html?id=${OJ.esc(p.problem_id)}">${OJ.esc(p.title)}</a>`
+            : `<span class="muted" title="题目可能已被删除">题目已删除</span>`}</td>
+          <td class="text-center">${p.difficulty ? OJ.difficultyLabel(p.difficulty) : "-"}</td>
+          <td class="text-center mono">${p.attempts}</td>
+          <td class="text-center mono">${p.best_score}</td>
+          <td class="mono muted">${OJ.fmtTime(p.first_ac_at)}</td>
+        </tr>`).join("");
+      return `<div class="card">
+        <div class="card-title">✅ 已通过题目 <span class="hint">共 ${d.solved_count} 道</span></div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>编号</th><th>标题</th><th class="text-center">难度</th>
+            <th class="text-center">尝试次数</th><th class="text-center">得分</th><th>首次通过</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table></div>
+      </div>`;
+    }
+
+    function renderContests(d) {
+      if (!d.contest_count) {
+        return `<div class="card">
+          <div class="card-title">🏁 参赛记录 <span class="hint">0 场</span></div>
+          <div class="empty">还没有参加过竞赛</div>
+        </div>`;
+      }
+      const rows = d.contests.map(c => {
+        const [stLabel, stCls] = CSTATUS[c.status] || ["", ""];
+        const isAcm = c.mode === "acm";
+        let rankCell;
+        if (c.rank) {
+          const cls = c.rank <= 3 ? `rank-${c.rank}` : "";
+          rankCell = `<span class="${cls}" style="font-weight:700">#${c.rank}</span>` +
+            `<span class="muted"> / ${c.total_participants}</span>`;
+        } else if (c.frozen) {
+          rankCell = '<span class="tag" title="榜单封榜中，结束后公布">封榜中</span>';
+        } else {
+          rankCell = '<span class="muted">-</span>';
+        }
+        return `<tr>
+          <td><a href="/leaderboard.html?c=${OJ.esc(c.contest_id)}">${OJ.esc(c.title)}</a>
+            <div class="muted" style="font-size:12px">${OJ.fmtTime(c.start_time)}</div></td>
+          <td class="text-center"><span class="badge ${stCls}">${stLabel}</span></td>
+          <td class="text-center mono">${isAcm ? c.solved : c.score}</td>
+          <td class="text-center mono">${isAcm ? c.penalty : "-"}</td>
+          <td class="text-center">${rankCell}</td>
+        </tr>`;
+      }).join("");
+      return `<div class="card">
+        <div class="card-title">🏁 参赛记录 <span class="hint">共 ${d.contest_count} 场，点击竞赛名查看榜单</span></div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>竞赛</th><th class="text-center">状态</th>
+            <th class="text-center">解题数 / 总分</th><th class="text-center">罚时</th>
+            <th class="text-center">名次</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table></div>
+      </div>`;
+    }
+
+    function renderRecent(d) {
+      const items = d.recent_submissions || [];
+      if (!items.length) {
+        return `<div class="card">
+          <div class="card-title">📝 近期提交</div>
+          <div class="empty">暂无提交记录</div>
+        </div>`;
+      }
+      const rows = items.map(s => `
+        <tr>
+          <td class="mono muted">${OJ.fmtTime(s.created_at)}</td>
+          <td><a href="/problem.html?id=${OJ.esc(s.problem_id)}">${OJ.esc(s.problem_id)}</a></td>
+          <td class="mono">${OJ.esc(s.language)}</td>
+          <td class="text-center">${OJ.verdictBadge(s.status)}</td>
+          <td class="text-center mono">${s.score}</td>
+          <td class="text-center mono">${OJ.fmtDuration(s.time_ms)}</td>
+          <td class="text-center mono">${OJ.fmtMem(s.memory_kb)}</td>
+        </tr>`).join("");
+      return `<div class="card">
+        <div class="card-title">📝 近期提交 <span class="hint">最近 ${items.length} 条</span></div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>提交时间</th><th>题目</th><th>语言</th>
+            <th class="text-center">结果</th><th class="text-center">得分</th>
+            <th class="text-center">时间</th><th class="text-center">内存</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table></div>
+      </div>`;
+    }
+
+    function render(d) {
+      document.title = `${d.nickname || d.username} 的主页 - 在线代码评测与竞赛系统`;
+      const acRate = d.total_submissions
+        ? Math.round(d.accepted_submissions / d.total_submissions * 100) : 0;
+      OJ.el("profileBody").innerHTML = `
+        <div class="card">
+          <div class="flex gap-12 wrap" style="align-items:center">
+            <div class="profile-avatar">${OJ.esc((d.nickname || d.username || "?").slice(0, 1).toUpperCase())}</div>
+            <div style="flex:1;min-width:200px">
+              <h1 style="font-size:22px">${OJ.esc(d.nickname || d.username)}
+                <span class="tag">${ROLE[d.role] || d.role}</span></h1>
+              <div class="muted" style="margin-top:4px">
+                用户名 <span class="mono">${OJ.esc(d.username)}</span>
+                · 注册于 ${OJ.fmtTime(d.created_at)}
+              </div>
+            </div>
+            ${OJ.currentUser() && OJ.currentUser().id === d.id
+              ? '<a class="btn btn-outline" href="/submissions.html?mine=1">查看我的全部提交</a>' : ""}
+          </div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-card"><div class="val" style="color:var(--green)">${d.solved_count}</div><div class="lbl">已通过题目</div></div>
+          <div class="stat-card"><div class="val">${d.attempted_problems}</div><div class="lbl">尝试过的题目</div></div>
+          <div class="stat-card"><div class="val">${d.total_submissions}</div><div class="lbl">提交总数</div></div>
+          <div class="stat-card"><div class="val" style="color:var(--primary)">${acRate}%</div><div class="lbl">提交通过率</div></div>
+          <div class="stat-card"><div class="val">${d.contest_count}</div><div class="lbl">参加竞赛</div></div>
+        </div>
+
+        ${renderSolved(d)}
+        ${renderContests(d)}
+        ${renderRecent(d)}`;
+    }
+
+    async function load() {
+      if (!userKey) {
+        OJ.el("profileBody").innerHTML =
+          '<div class="card"><div class="empty">缺少用户参数</div></div>';
+        return;
+      }
+      try {
+        const d = await OJ.api("/profiles/" + encodeURIComponent(userKey));
+        render(d);
+      } catch (e) {
+        OJ.el("profileBody").innerHTML =
+          `<div class="card"><div class="empty">${OJ.esc(e.message || "加载失败")}</div>
+           <div class="text-center" style="margin-top:-24px"><a class="btn btn-outline" href="/index.html">返回题目列表</a></div></div>`;
+      }
+    }
+
+    load();
+  </script>
+</body>
+</html>

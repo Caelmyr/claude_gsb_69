@@ -43,7 +43,7 @@
         if (!users.length) { tbody.innerHTML = `<tr><td colspan="7" class="empty">暂无用户</td></tr>`; return; }
         tbody.innerHTML = users.map(u => `
           <tr>
-            <td class="mono">${OJ.esc(u.username)}</td>
+            <td class="mono"><a href="${OJ.profileHref(u.id)}">${OJ.esc(u.username)}</a></td>
             <td>${OJ.esc(u.nickname)}</td>
             <td class="muted">${OJ.esc(u.email || "-")}</td>
             <td class="text-center">${ROLE[u.role] || u.role}</td>

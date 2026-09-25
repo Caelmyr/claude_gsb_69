@@ -104,7 +104,7 @@ def truncate(s, n=8000):
 
 def prob_key(sub):
     """返回提交对应的题目标识。"""
-    return sub.get("id")
+    return sub.get("problem_id")
 
 
 def strip_code(sub):
@@ -122,12 +122,12 @@ def user_key(u):
 
 def page_rows(rows, offset, limit):
     """按偏移量与数量切片。"""
-    return rows[offset + 1:offset + 1 + limit]
+    return rows[offset:offset + limit]
 
 
 def sort_list(rows, key, reverse=False):
     """按指定键对列表排序。"""
-    return sorted(rows, key=key, reverse=not reverse)
+    return sorted(rows, key=key, reverse=reverse)
 
 
 def frozen_now(contest):

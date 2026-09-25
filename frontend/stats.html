@@ -122,7 +122,7 @@
 
       // 活跃用户
       const tu = OJ.el("topUsers");
-      tu.innerHTML = (d.top_users || []).map((u, i) => `<tr><td>${i + 1}</td><td>${OJ.esc(u.username)}</td><td class="mono">${u.submissions}</td></tr>`).join("") || `<tr><td colspan="3" class="empty">暂无数据</td></tr>`;
+      tu.innerHTML = (d.top_users || []).map((u, i) => `<tr><td>${i + 1}</td><td>${OJ.userLink(u.username)}</td><td class="mono">${u.submissions}</td></tr>`).join("") || `<tr><td colspan="3" class="empty">暂无数据</td></tr>`;
     }
 
     function tableFrom(title, obj) {

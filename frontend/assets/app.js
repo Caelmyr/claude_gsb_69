@@ -90,7 +90,7 @@
           <div class="nav-links">${links}</div>
           <div class="nav-user">
             ${user
-              ? `<span class="uname">${esc(user.nickname || user.username)}</span>` +
+              ? `<a class="uname" href="${profileHref(user.id)}" title="我的公开主页">${esc(user.nickname || user.username)}</a>` +
                 (admin ? `<span class="role-tag">管理员</span>` : "") +
                 `<button class="btn btn-outline btn-sm" onclick="OJ.logout();location.href='/index.html'">退出</button>`
               : `<button class="btn btn-primary btn-sm" onclick="location.href='/index.html?login=1'">登录</button>`}
@@ -148,6 +148,18 @@
   }
 
   function el(id) { return document.getElementById(id); }
+
+  /* ---------- 用户公开主页 ---------- */
+  function profileHref(idOrName) {
+    return "/profile.html?u=" + encodeURIComponent(idOrName || "");
+  }
+
+  // 可点击的用户名（默认进入公开主页）
+  function userLink(idOrName, label, extraClass) {
+    const name = label === undefined || label === null ? idOrName : label;
+    if (!idOrName) return esc(name || "");
+    return `<a class="${extraClass || "user-link"}" href="${profileHref(idOrName)}">${esc(name || idOrName)}</a>`;
+  }
 
   function openModal(title, bodyHTML) {
     const mask = document.createElement("div");
@@ -211,6 +223,7 @@
     api, esc, fmtTime, fmtDuration, fmtMem, verdictBadge, difficultyLabel,
     toast, el, openModal, confirmDialog, boot, countdown,
     setSession, logout, currentUser, isAdmin, requireAuth, goLogin,
+    profileHref, userLink,
     store,
   };
 })(window);

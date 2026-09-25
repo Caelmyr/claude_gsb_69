@@ -428,27 +428,39 @@ class JudgeEngine:
         """列出提交（默认取全局近期列表；有过滤条件时扫描分片）。"""
         with self._lock:
             recent = list(self._recent)
+
+        def _match(s):
+            if user_id and s.get("user_id") != user_id and s.get("username") != user_id:
+                return False
+            if problem_id and s.get("problem_id") != problem_id:
+                return False
+            return True
+
         # 无过滤条件：直接取内存近期列表
         if not contest_id and not user_id and not problem_id:
             rows = recent
-        else:
+        elif contest_id:
             rows = []
-            if contest_id:
-                cdir = _submission_dir(contest_id)
+            cdir = _submission_dir(contest_id)
+            for uid in list_files(cdir):
+                shard = read_json(os.path.join(cdir, uid + ".json"))
+                if not shard:
+                    continue
+                for s in shard.get("submissions", []):
+                    if _match(s):
+                        rows.append(s)
+        else:
+            # 按用户/题目过滤：扫描全部分片（近期缓存可能不全）
+            rows = []
+            for cid in list_dirs(config.SUBMISSIONS_DIR):
+                cdir = _submission_dir(cid)
                 for uid in list_files(cdir):
                     shard = read_json(os.path.join(cdir, uid + ".json"))
                     if not shard:
                         continue
                     for s in shard.get("submissions", []):
-                        if user_id and s["user_id"] != user_id:
-                            continue
-                        if problem_id and s["problem_id"] != problem_id:
-                            continue
-                        rows.append(s)
-            else:
-                rows = [s for s in recent
-                        if (not user_id or s.get("username") == user_id)
-                        and (not problem_id or s["problem_id"] == problem_id)]
+                        if _match(s):
+                            rows.append(s)
 
         rows = sort_list(rows, key=lambda s: s.get("created_at", ""), reverse=True)
         total = len(rows)

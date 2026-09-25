@@ -272,6 +272,18 @@ code.inline { font-family: var(--mono); background: var(--surface-2); padding: 1
 
 /* 工具 */
 .hidden { display: none !important; }
+
+/* 用户公开主页 */
+.profile-avatar {
+  width: 64px; height: 64px; border-radius: 16px; flex: none;
+  background: linear-gradient(135deg, #3d5afe, #7c3aed);
+  color: #fff; font-size: 28px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+a.user-link { font-weight: 600; }
+.nav-user a.uname { color: var(--text); }
+.nav-user a.uname:hover { color: var(--primary); }
+
 .mt-8 { margin-top: 8px; } .mt-16 { margin-top: 16px; } .mb-16 { margin-bottom: 16px; }
 .flex { display: flex; } .flex-between { display: flex; justify-content: space-between; align-items: center; }
 .gap-8 { gap: 8px; } .gap-12 { gap: 12px; } .wrap { flex-wrap: wrap; }
