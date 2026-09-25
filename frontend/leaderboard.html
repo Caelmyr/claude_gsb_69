@@ -47,7 +47,10 @@
       try {
         const data = await OJ.api("/contests");
         sel.innerHTML = data.items.map(c => `<option value="${OJ.esc(c.id)}">${OJ.esc(c.title)}</option>`).join("");
-        if (data.items.length) { sel.value = data.items[0].id; load(); }
+        // 支持通过 ?contest=<id> 预选（如从个人主页的参赛记录跳入）
+        const want = new URLSearchParams(location.search).get("contest");
+        const picked = data.items.find(c => c.id === want) || data.items[0];
+        if (picked) { sel.value = picked.id; load(); }
         else { OJ.el("lbBody").innerHTML = `<tr><td colspan="10" class="empty">暂无竞赛</td></tr>`; }
       } catch (e) {}
     }
@@ -109,7 +112,7 @@
           : `<td class="text-center solved-cell">${r.score}</td><td class="text-center mono">${OJ.fmtDuration(r.total_time_ms)}</td>`;
         return `<tr class="${meCls}">
           <td class="${rankCls}" style="font-weight:700">${r.rank}</td>
-          <td>${OJ.esc(r.nickname || r.username)}${r.user_id === d.me ? " <span class='role-tag'>我</span>" : ""}</td>
+          <td><a href="/profile.html?u=${encodeURIComponent(r.username)}">${OJ.esc(r.nickname || r.username)}</a>${r.user_id === d.me ? " <span class='role-tag'>我</span>" : ""}</td>
           ${metric}${cells}
         </tr>`;
       }).join("");

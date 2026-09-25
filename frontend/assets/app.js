@@ -90,7 +90,7 @@
           <div class="nav-links">${links}</div>
           <div class="nav-user">
             ${user
-              ? `<span class="uname">${esc(user.nickname || user.username)}</span>` +
+              ? `<a class="uname" href="/profile.html?u=${encodeURIComponent(user.username)}">${esc(user.nickname || user.username)}</a>` +
                 (admin ? `<span class="role-tag">管理员</span>` : "") +
                 `<button class="btn btn-outline btn-sm" onclick="OJ.logout();location.href='/index.html'">退出</button>`
               : `<button class="btn btn-primary btn-sm" onclick="location.href='/index.html?login=1'">登录</button>`}

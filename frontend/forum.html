@@ -46,7 +46,7 @@
           <div class="thread">
             <div><a class="t-title" onclick="view('${OJ.esc(t.id)}')" style="cursor:pointer">${OJ.esc(t.title)}</a>
               ${t.problem_id ? `<span class="tag" style="margin-left:6px">${OJ.esc(t.problem_id)}</span>` : ""}</div>
-            <div class="t-meta">${OJ.esc(t.author_name)} · ${OJ.fmtTime(t.created_at)} · ${(t.replies || []).length} 回复</div>
+            <div class="t-meta"><a href="/profile.html?u=${encodeURIComponent(t.author)}">${OJ.esc(t.author_name)}</a> · ${OJ.fmtTime(t.created_at)} · ${(t.replies || []).length} 回复</div>
           </div>`).join("");
       } catch (e) { box.innerHTML = `<div class="empty">${OJ.esc(e.message)}</div>`; }
     }
@@ -99,10 +99,10 @@
       try {
         const t = await OJ.api("/forum/" + id);
         const replies = (t.replies || []).map(r => `
-          <div class="reply"><div class="r-meta">${OJ.esc(r.author_name)} · ${OJ.fmtTime(r.created_at)}</div><div>${OJ.esc(r.content)}</div></div>`).join("");
+          <div class="reply"><div class="r-meta"><a href="/profile.html?u=${encodeURIComponent(r.author)}">${OJ.esc(r.author_name)}</a> · ${OJ.fmtTime(r.created_at)}</div><div>${OJ.esc(r.content)}</div></div>`).join("");
         const body = `
           <h4 style="margin-bottom:6px">${OJ.esc(t.title)}</h4>
-          <div class="muted" style="font-size:12px;margin-bottom:12px">${OJ.esc(t.author_name)} · ${OJ.fmtTime(t.created_at)}${t.problem_id ? " · " + OJ.esc(t.problem_id) : ""}</div>
+          <div class="muted" style="font-size:12px;margin-bottom:12px"><a href="/profile.html?u=${encodeURIComponent(t.author)}">${OJ.esc(t.author_name)}</a> · ${OJ.fmtTime(t.created_at)}${t.problem_id ? " · " + OJ.esc(t.problem_id) : ""}</div>
           <div style="white-space:pre-wrap">${OJ.esc(t.content)}</div>
           <hr style="border:none;border-top:1px solid var(--border);margin:16px 0">
           <div class="card-title">回复（${(t.replies || []).length}）</div>

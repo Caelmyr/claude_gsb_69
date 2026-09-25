@@ -59,7 +59,7 @@
         tbody.innerHTML = data.items.map(s => `
           <tr>
             <td class="mono muted">${OJ.fmtTime(s.created_at)}</td>
-            <td>${OJ.esc(s.nickname || s.username)}</td>
+            <td><a href="/profile.html?u=${encodeURIComponent(s.username)}">${OJ.esc(s.nickname || s.username)}</a></td>
             <td>${OJ.esc(problemNames[s.problem_id] || s.problem_id)}</td>
             <td class="mono">${OJ.esc(s.language)}</td>
             <td class="text-center">${OJ.verdictBadge(s.status)}</td>

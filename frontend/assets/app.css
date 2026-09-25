@@ -78,6 +78,8 @@ a:hover { color: var(--primary-600); }
 .nav-links a.active { color: var(--primary); background: var(--primary-50); }
 .nav-user { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
 .nav-user .uname { font-weight: 600; }
+.nav-user a.uname { color: var(--text); }
+.nav-user a.uname:hover { color: var(--primary); }
 .nav-user .role-tag {
   font-size: 11px; padding: 2px 7px; border-radius: 20px;
   background: var(--primary-50); color: var(--primary); font-weight: 600;
@@ -244,6 +246,20 @@ code.inline { font-family: var(--mono); background: var(--surface-2); padding: 1
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 @media (max-width: 860px) { .grid-2, .grid-3, .form-row, .form-row-3 { grid-template-columns: 1fr; } }
+
+/* ---------- 个人主页 ---------- */
+.profile-head { display: flex; align-items: center; gap: 16px; }
+.profile-head .avatar {
+  width: 64px; height: 64px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, #3d5afe, #7c3aed);
+  color: #fff; font-size: 26px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+.profile-head .role-tag {
+  font-size: 11px; padding: 2px 7px; border-radius: 20px;
+  background: var(--primary-50); color: var(--primary); font-weight: 600;
+  vertical-align: middle; margin-left: 4px;
+}
 
 /* ---------- 空状态 / 加载 ---------- */
 .empty { text-align: center; color: var(--text-muted); padding: 48px 20px; }
